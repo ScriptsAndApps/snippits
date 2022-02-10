@@ -1,0 +1,79 @@
+namespace ConsoleApp5
+{
+    public class Downloader
+    {
+        private readonly string _downloadPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Downloads");
+
+        private WebClient _client;
+
+        public Downloader()
+        {
+            if(!Directory.Exists(_downloadPath))
+            {
+                Directory.CreateDirectory(_downloadPath);
+            }
+        }               
+
+        public void Download(Uri link,string outputFile)
+        {
+            using (_client = new WebClient())
+            {
+                _client.DownloadProgressChanged += _client_DownloadProgressChanged;
+
+                _client.DownloadFileCompleted += _client_DownloadFileCompleted;
+
+                _client.QueryString.Add("fileName", outputFile);
+
+                _client.DownloadFileAsync(link,$"{_downloadPath}\\{outputFile}");
+            }
+        }
+
+        private void _client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            if (e.Error != null)
+                Console.WriteLine("An error occurred during download");
+
+            var file = ((System.Net.WebClient)(sender)).QueryString["fileName"];
+
+            if (File.Exists($"{_downloadPath}\\{file}"))
+            {
+                Process.Start($"{_downloadPath}\\{file}");
+            }
+        }
+
+        private void _client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            double bytesIn = double.Parse(e.BytesReceived.ToString());
+
+            double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+
+            double percentage = bytesIn / totalBytes * 100;
+
+            Console.WriteLine($"[INFO] Downloaded {e.ProgressPercentage} % =>Received {e.BytesReceived} of {e.TotalBytesToReceive} bytes");
+        }
+    }
+}
+
+
+
+
+
+namespace ConsoleApp5
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            new Downloader().Download(new Uri("https://the.earth.li/~sgtatham/putty/latest/w64/putty.exe"), "putty.exe");
+
+            Console.ReadLine();
+        }       
+    }
+}
+
+
+
+
+
+
+
