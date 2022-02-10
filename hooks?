@@ -1,0 +1,144 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+ 
+namespace KeyboardHooks
+{
+    public partial class Form1 : Form
+    {
+        private HooksController _listener;
+        public Form1()
+        {
+            InitializeComponent();
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            _listener = new HooksController();
+            _listener.OnKeyPressed += _listener_OnKeyPressed;
+            _listener.HookKeyboard();
+            foreach(Control C in this.Controls)
+            {
+                if(C.Name.Contains("text"))
+                {
+                    textBoxes.Add((TextBox)C);
+                }
+            }
+            textBoxes.Reverse();
+        }
+        List<string> AllBoys = new List<string>();
+        List<TextBox> textBoxes = new List<TextBox>();
+        int current = -1;
+        bool recording = false;
+ 
+        void _listener_OnKeyPressed(object sender, KeyPressedArgs e)
+        {
+            if (recording)
+            {
+                textBoxes[current].Text += e.KeyPressed.ToString() + " + ";
+                if(textBoxes[current].Text.Split('+').Length == 4)
+                {
+                    disableRecording(current);
+                    return;
+                }
+            }
+            else
+            {
+                AllBoys.Add(e.KeyPressed.ToString());
+                if (AllBoys.Count >= 3)
+                {
+                    string lay = AllBoys[AllBoys.Count - 3] + " + " + AllBoys[AllBoys.Count - 2] + " + " + AllBoys[AllBoys.Count - 1];
+                    label1.Text = lay;
+                    doMacro(lay);
+                }
+            }
+        }
+        private void doMacro(string input)
+        {
+            int doAction = -1;
+            for(int i = 0; i < textBoxes.Count; i++)
+            {
+                if (textBoxes[i].Text == input)
+                {
+                    doAction = i;
+                }
+            }
+            switch (doAction)
+            {
+                case 0:
+                    System.Diagnostics.Process.Start("http://google.com");
+                    break;
+                case 1:
+ 
+                    break;
+                case 2:
+ 
+                    break;
+                case 3:
+ 
+                    break;
+                case 4:
+ 
+                    break;
+                case 5:
+ 
+                    break;
+                case 6:
+ 
+                    break;
+                case 7:
+ 
+                    break;
+                case 8:
+ 
+                    break;
+                case 9:
+ 
+                    break;
+                case 10:
+ 
+                    break;
+                case 11:
+ 
+                    break;
+                case 12:
+ 
+                    break;
+                case 13:
+ 
+                    break;
+ 
+            }
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _listener.UnHookKeyboard();
+        }
+        
+        private void disableRecording(int zone)
+        {
+            recording = false;
+            textBoxes[zone].Text = textBoxes[zone].Text.Remove(textBoxes[zone].Text.Length - 3, 3);
+        }
+ 
+        private void textBox14_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            recording = true;
+            TextBox selected = (TextBox)sender;
+            selected.Clear();
+            for (int i = 0; i < textBoxes.Count; i++)
+            {
+                if(textBoxes[i] == selected)
+                {
+                    current = i;
+                }
+            }
+ 
+        }
+    }
+}
