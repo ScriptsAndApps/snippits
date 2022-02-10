@@ -1,0 +1,31 @@
+private static ManagementEventWatcher startWatch;
+
+static async Task Main(string[] args)
+{
+    await Task.Run(() => { WaitForProcess(); });
+    Console.ReadKey();
+}
+
+static void WaitForProcess()
+{
+    startWatch = new ManagementEventWatcher(new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace"));
+    startWatch.EventArrived += new EventArrivedEventHandler(startWatch_EventArrived);
+    startWatch.Start();
+}
+
+static void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
+{
+    Console.WriteLine("Process started: {0}", e.NewEvent.Properties["ProcessName"].Value);
+
+    foreach (var process in Process.GetProcessesByName("perfmon"))
+    {
+        try
+        {
+            process.Kill();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
