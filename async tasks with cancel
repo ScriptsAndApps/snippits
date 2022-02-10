@@ -1,0 +1,64 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace TaskCancellationExample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            new Program().EntryPoint(args);
+        }
+
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        void EntryPoint(string[] args)
+        {
+            Task task = Task.Run(() =>
+            {
+                try
+                {
+                    Work();
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Task Cancelled");
+                }
+                finally
+                {
+                    Console.WriteLine("Exection completed");
+                }
+            }, cancellationTokenSource.Token);
+
+            task.Wait();
+
+            if (cancellationTokenSource.IsCancellationRequested)
+                Console.WriteLine("Task was cancelled through cancellation token");
+
+            cancellationTokenSource.Dispose();
+
+            Console.WriteLine("Press any key to exit");
+            Console.Read();
+        }
+
+        void CancelTask()
+        {
+            if (!cancellationTokenSource.IsCancellationRequested)
+                cancellationTokenSource.Cancel();
+        }
+
+        void Work()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (cancellationTokenSource.IsCancellationRequested)
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                Console.WriteLine("Task {0} is running: {1}", Task.CurrentId, i);
+
+                if (i == 3)
+                    CancelTask();
+            }
+        }
+    }
+}
