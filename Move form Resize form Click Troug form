@@ -1,0 +1,83 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Interop;
+
+namespace ch
+{
+    public partial class Form2 : Form
+    {
+        public Form2()
+        {
+            InitializeComponent();
+        }
+        // initialize -> this.SetStyle(ControlStyles.ResizeRedraw, true);
+        // then use protected override void OnPaint(PaintEventArgs e){}
+        private const int cGrip = 16;    
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x00A3)
+            {
+                //disable double click fullscreen etc
+                return;
+                //m.Result = (IntPtr)0;
+            }
+
+            if (m.Msg == 0x84)
+            {
+                Point pos = new Point(m.LParam.ToInt32());
+                pos = this.PointToClient(pos);
+                //rezize
+                //corners
+                if (pos.X >= this.ClientSize.Width - cGrip 
+                    && pos.Y >= this.ClientSize.Height - cGrip){
+                    m.Result = (IntPtr)17; return; }
+                if (pos.X >= this.ClientSize.Width - cGrip && pos.Y <= cGrip){
+                    m.Result = (IntPtr)14; return; }
+                if (pos.X <= cGrip && pos.Y <= cGrip){
+                    m.Result = (IntPtr)13; return; }
+                if (pos.X <= cGrip && pos.Y >= this.ClientSize.Height - cGrip){
+                    m.Result = (IntPtr)16; return;}
+               //sides 
+                if (pos.X <= cGrip) {
+                    m.Result = (IntPtr)10; return; }
+                if (pos.X >= this.ClientSize.Width - cGrip) {
+                    m.Result = (IntPtr)11; return; }
+                //bottom
+                if (pos.Y <= cGrip){
+                    m.Result = (IntPtr)12;return; }
+                if (pos.Y >= this.ClientSize.Height - cGrip) {
+                    m.Result = (IntPtr)15; return;}
+                //Move
+                //intire form
+                m.Result = (IntPtr)2; return;
+              
+            }
+            base.WndProc(ref m);
+        }
+       
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern UInt32 GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        static extern int SetWindowLong(IntPtr hWnd, int nIndex, UInt32 dwNewLong);
+      
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            label1.Text = Text;
+            //click trough
+            //uint initialStyle = GetWindowLong(this.Handle, -20);
+            //SetWindowLong(this.Handle, -20, initialStyle | 0x80000 | 0x20);
+        }
+    }
+}
