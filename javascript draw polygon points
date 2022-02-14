@@ -1,3 +1,6 @@
+http://jsfiddle.net/21n0focp/
+
+
 <p>Move, press and release the mouse</p>
 <p id="downlog">Down</p>
 <p id="movelog">Move</p>
