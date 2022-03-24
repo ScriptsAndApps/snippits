@@ -1,0 +1,10 @@
+@echo off
+for /l %%a in (1,1,2) do (
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /out:networkstabilc.exe /target:winexe program.cs form1.cs Form1.Designer.cs && (
+  #networkstabilc.exe
+  exit
+) || (
+  echo ERROR!
+)
+)
+pause
